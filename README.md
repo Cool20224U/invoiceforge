@@ -1,43 +1,49 @@
-# ⚡ InvoiceForge — Professional Invoice Generator
+# 🧰 The Freelance Business-in-a-Box
 
-A zero-dependency, single-file web app that generates clean, professional PDF invoices. No backend, no accounts, no subscriptions — your customers open one HTML file and get to work.
+Three zero-dependency, single-file tools that cover a freelancer's entire paperwork flow: **win the client → protect the work → get paid.** No backend, no accounts, no subscriptions — every tool is one `index.html` your customers can open anywhere.
 
-## Why this sells
+## The suite
 
-- **Real pain point**: freelancers and small businesses constantly need invoices and hate paying $10–30/month for it.
-- **Zero infrastructure**: one `index.html` file. Host it anywhere (Netlify, GitHub Pages) or ship it as a file customers open locally. No server costs, nothing to maintain.
-- **Instant PDF export** via the browser's native print-to-PDF (crisp, vector output — no watermark).
-- **Privacy angle**: all data stays on the customer's device (localStorage drafts). Great marketing claim.
+| Tool | What it does | Live demo |
+|---|---|---|
+| 📄 **[ProposalForge](proposalforge/)** | Proposals, quotes & contracts with a click-to-add clause library and typed e-signatures | [Try it](https://cool20224u.github.io/invoiceforge/proposalforge/) |
+| 🧾 **[LegalForge](legalforge/)** | NDAs, IP assignments & service agreements with plain-English clauses | [Try it](https://cool20224u.github.io/invoiceforge/legalforge/) |
+| ⚡ **InvoiceForge** (this folder) | Professional invoices with live preview and clean PDF export | [Try it](https://cool20224u.github.io/invoiceforge/) |
 
-## Features
+## Why these sell
+
+- **Real pain, one-time price**: freelancers pay $10–30/month for invoicing and proposal SaaS. These tools cost them once.
+- **Bundle economics**: the three tools are a natural funnel — cross-sell as a bundle and raise average order value.
+- **Zero infrastructure**: static files, free hosting (GitHub Pages / Netlify), nothing to maintain.
+- **Privacy angle**: all data stays on the buyer's device. Nothing uploads.
+
+## Features shared by all three
 
 - Live side-by-side preview while you type
-- Multiple line items (qty × rate)
-- Tax rate and discount support
-- 6 currencies (USD, EUR, GBP, JPY, INR, BRL)
-- Save/load drafts in the browser
-- Clean, print-optimized PDF layout
-- Modern dark UI, single self-contained file (~13 KB)
+- Clean, print-optimized **PDF export** via the browser (no watermark, vector output)
+- **Typed e-signatures** (legally recognized in most jurisdictions — ESIGN / eIDAS)
+- Save/load drafts via localStorage — 100% client-side
+- Modern dark UI, single self-contained file each (~13–21 KB)
 
-## Run it
+## Run locally
 
-Just open `index.html` in any modern browser. That's it.
+Open any `index.html` in a modern browser. No build step, no server.
 
-To host it for free:
+## Suggested pricing
 
-```bash
-# Netlify Drop: drag the folder onto https://app.netlify.com/drop
-# or GitHub Pages: push index.html to a repo and enable Pages
-```
+| Tier | Price |
+|---|---|
+| InvoiceForge | $15 |
+| ProposalForge | $19 |
+| LegalForge | $19 |
+| **Complete Freelance Business-in-a-Box** | **$49** |
 
-## How to sell it
+Sell on Gumroad, Lemon Squeezy, or Etsy. Host the demos free on GitHub Pages (already live) as your "try before you buy" page.
 
-1. **Polish the brand** — rename it, pick your own accent colors in the `:root` CSS variables, add your name to the footer.
-2. **Pick a niche** — "Invoice generator for freelance designers" outsells a generic one. Adjust the default notes/tax wording to the niche.
-3. **List it** on Gumroad, Lemon Squeezy, or Etsy (digital download). Typical price: **$9–29** for the file, or bundle a "brandable/resale license" at $49+.
-4. **Demo first** — host a live preview for free and sell the downloadable, brandable version.
-5. **Marketing assets** — the PDF output itself is your best screenshot.
+## ⚠️ Disclaimer
+
+LegalForge templates are a starting point, not legal advice. Buyers should have significant contracts reviewed by a qualified lawyer in their jurisdiction.
 
 ## License
 
-Ship it under whatever license you choose. Suggested: personal-use license for the cheap tier, resale/white-label license for the premium tier.
+MIT — see [LICENSE](LICENSE).
