@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ContentForge — 30-Day Social Media Calendar Generator</title>
+<style>
+:root{
+  --bg:#0f1117;--panel:#181b24;--panel2:#1f2330;--border:#2a2f3f;
+  --text:#e8eaf2;--muted:#8b90a3;--accent:#fd79a8;--accent2:#fabca8;
+  --red:#e17055;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.app{display:grid;grid-template-columns:400px 1fr;min-height:100vh}
+@media(max-width:1000px){.app{grid-template-columns:1fr}.preview-wrap{order:-1}}
+
+.sidebar{background:var(--panel);border-right:1px solid var(--border);padding:28px;overflow-y:auto;max-height:100vh}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px;margin-bottom:6px}
+.logo .mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px}
+.tagline{font-size:12px;color:var(--muted);margin-bottom:22px}
+h2.sec{font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin:24px 0 12px}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+input,select{width:100%;background:var(--panel2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:9px 12px;font-size:14px;outline:none;margin-bottom:12px}
+input:focus,select:focus{border-color:var(--accent)}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer;transition:.15s}
+.btn:hover{filter:brightness(1.1)}
+.btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn.ghost:hover{border-color:var(--accent)}
+.btn.block{width:100%;margin-top:6px}
+.pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.5px;background:rgba(253,121,168,.15);color:var(--accent2);margin:0 6px 6px 0;cursor:pointer;border:1px solid transparent}
+.pill.off{opacity:.35;border-color:var(--border)}
+.tiny{font-size:11px;color:var(--muted);margin-top:4px;display:block}
+
+.preview-wrap{padding:34px;display:flex;flex-direction:column;align-items:center;background:radial-gradient(1000px 500px at 80% -10%,rgba(253,121,168,.10),transparent)}
+.paper{width:100%;max-width:820px;background:#fff;color:#1a1a2e;border-radius:6px;box-shadow:0 20px 60px rgba(0,0,0,.5);padding:48px}
+.paper *{color:inherit}
+.p-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.p-brand{font-size:24px;font-weight:800}
+.p-title{font-size:26px;font-weight:300;letter-spacing:2px;color:#e84393;text-transform:uppercase;text-align:right}
+.p-sub{font-size:12px;color:#666;margin-bottom:26px}
+.p-pillars{margin-bottom:24px}
+.p-pillars h4,.p-strategy h4{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#999;margin-bottom:10px}
+.p-pillars p{font-size:13px;line-height:1.8;color:#444}
+table.cal{width:100%;border-collapse:collapse;margin-bottom:24px}
+table.cal th{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:#999;text-align:left;padding:8px 6px;border-bottom:2px solid #e8e8f2}
+table.cal td{padding:9px 6px;font-size:11.5px;border-bottom:1px solid #f0f0f6;vertical-align:top;line-height:1.6}
+table.cal .day{font-weight:800;color:#e84393;white-space:nowrap}
+table.cal .tag{display:inline-block;background:#fdeef3;color:#e84393;border-radius:4px;padding:1px 7px;font-size:10px;font-weight:700;margin-bottom:3px;white-space:nowrap}
+table.cal .cap{color:#333}
+table.cal .hash{color:#a05a78;font-size:10.5px}
+table.cal .time{color:#888;white-space:nowrap;font-size:10.5px}
+.p-strategy{border-top:1px solid #e8e8f2;padding-top:20px}
+.p-strategy .tip{font-size:12.5px;line-height:1.8;color:#444;margin-bottom:8px;padding-left:18px;position:relative}
+.p-strategy .tip:before{content:'✓';position:absolute;left:0;color:#e84393;font-weight:700}
+.statusbar{display:flex;gap:12px;align-items:center;margin-bottom:20px;width:100%;max-width:820px;justify-content:space-between}
+.statusbar .hint{font-size:13px;color:var(--muted)}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;opacity:0;transition:.3s;pointer-events:none}
+.toast.show{opacity:1}
+@media print{
+  body{background:#fff}
+  .sidebar,.statusbar,.toast{display:none!important}
+  .app{display:block}
+  .preview-wrap{padding:0;background:none}
+  .paper{box-shadow:none;border-radius:0;max-width:100%;padding:20px}
+  table.cal{page-break-inside:auto}
+  table.cal tr{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="logo"><div class="mark">🗓️</div>ContentForge</div>
+    <div class="tagline">A month of social content, generated in seconds.</div>
+
+    <h2 class="sec">Brand</h2>
+    <label for="brandName">Business name</label>
+    <input id="brandName" placeholder="Bella Vista Restaurant" oninput="render()">
+    <label for="brandHandle">Social handle</label>
+    <input id="brandHandle" placeholder="@bellavista" oninput="render()">
+
+    <h2 class="sec">Niche</h2>
+    <select id="niche" onchange="render()">
+      <option value="restaurant">🍽️ Restaurant / Café</option>
+      <option value="gym">💪 Gym / Fitness Studio</option>
+      <option value="realestate">🏠 Real Estate Agent</option>
+      <option value="dentist">🦷 Dentist / Clinic</option>
+      <option value="salon">💇 Salon / Barber</option>
+      <option value="retail">🛍️ Retail / Boutique</option>
+      <option value="generic">✨ General Business</option>
+    </select>
+
+    <h2 class="sec">Month</h2>
+    <div class="row">
+      <div><label for="month">Month</label>
+        <select id="month" onchange="render()"></select></div>
+      <div><label for="year">Year</label><input id="year" type="number" min="2024" max="2035" oninput="render()"></div>
+    </div>
+
+    <h2 class="sec">Platforms</h2>
+    <div id="platforms"></div>
+    <span class="tiny">Toggle platforms to include their formats & posting times.</span>
+
+    <h2 class="sec">Generate</h2>
+    <button class="btn block" onclick="render(true)">🎲 Generate fresh calendar</button>
+    <button class="btn ghost block" onclick="copyPlan()">📋 Copy as text</button>
+    <span class="tiny">Each click generates a new mix of ideas from your niche's content pillars.</span>
+  </aside>
+
+  <main class="preview-wrap">
+    <div class="statusbar">
+      <span class="hint">Live preview — click <b>Download PDF</b> and choose “Save as PDF”.</span>
+      <button class="btn" onclick="window.print()">⬇ Download PDF</button>
+    </div>
+    <div class="paper">
+      <div class="p-head">
+        <div>
+          <div class="p-brand" id="p-brand">Your Business</div>
+          <div style="font-size:12px;color:#888" id="p-handle"></div>
+        </div>
+        <div class="p-title">Content Plan</div>
+      </div>
+      <div class="p-sub" id="p-sub"></div>
+      <div class="p-pillars" id="p-pillars"></div>
+      <table class="cal">
+        <thead><tr><th>Day</th><th>Type</th><th>Idea & caption</th><th>Hashtags</th><th>Best time</th></tr></thead>
+        <tbody id="p-rows"></tbody>
+      </table>
+      <div class="p-strategy" id="p-strategy"></div>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const F = id => document.getElementById(id);
+let platforms = {instagram:true, facebook:true, tiktok:false, linkedin:false};
+let seed = 1;
+
+const NICHES = {
+  restaurant: {
+    pillars:['Behind the scenes','Signature dish','Customer love','Offer & events','Tips & education','Fun & trends'],
+    ideas:{
+      'Behind the scenes':['Prep time-lapse of today\'s fresh ingredients','Meet the chef: 30-second intro video','How our signature sauce is made, step 1→final','Sunday morning setup before we open the doors','A quiet moment: coffee being poured in slow motion'],
+      'Signature dish':['Close-up of our most-ordered dish','The story behind our signature dish','Build-it: every layer of our best burger','Dish of the week with today\'s special price','Which dish should we feature next? Ask in comments'],
+      'Customer love':['Repost a customer story or tag','Table full of smiling regulars (with permission)','Review of the week screenshot','"Why our regulars keep coming back" carousel','Thank-you post: 100 tags and counting'],
+      'Offer & events':['Weekend special: 2-for-1 announcement','Live music this Friday — save the date','Ramadan / seasonal menu launch','Loyalty card: every 10th coffee free','Book your holiday table now — link in bio'],
+      'Tips & education':['How to reheat delivery pizza the right way','3 wine pairings for our signature dish','Storage tips: keeping takeaway fresh','Coffee 101: latte vs flat white','Spice-level guide to our menu'],
+      'Fun & trends':['POV: you walked past our bakery at 7am','Staff picks their favorite menu item','This or that: sweet vs savory poll','Guess the dish from one ingredient','Rate your comfort food 1–10 in comments']
+    },
+    hashtags:['#foodie #localfood #foodstagram #[brand]','#supportlocal #[brand] #dinnerideas','#foodlovers #[brand] #instafood #eatlocal','#cafelife #[brand] #brunch','#yummy #[brand] #foodphotography'],
+    tips:['Post food photos at 11:30am and 6:30pm — right before hunger peaks','Reply to every comment within the first hour; the algorithm rewards it','Geotag your location and use local hashtags to attract nearby customers','Repost one customer story per week — social proof outsells any ad']
+  },
+  gym: {
+    pillars:['Member wins','Workout tips','Behind the scenes','Offers & challenges','Motivation','Community'],
+    ideas:{
+      'Member wins':['Member transformation of the month','First pull-up milestone celebration','Before/after: 12-week program result','Member testimonial: why they train here','Progress you can\'t always see — strength PRs'],
+      'Workout tips':['30-second form fix: squat depth','5 stretches for desk workers','Protein guide: how much do you really need?','3 fat-burning finishers to end any session','Rest-day mobility routine (save this post)'],
+      'Behind the scenes':['5am club: who trains before sunrise','Coach\'s corner: this week\'s programming logic','Equipment spotlight: how to use the sled','Gym tour: what\'s new this month','Meet the newest member of our coaching team'],
+      'Offers & challenges':['New member offer: first week free','30-day summer challenge announcement','Bring-a-friend weekend','Referral rewards: train free for a month','Small-group strength program opens Monday'],
+      'Motivation':['"You don\'t have to be extreme, just consistent."','The workout you skip today is the result you lose in June','One hour is 4% of your day','From the couch to the door: the hardest 10 minutes','Tag someone who needs this today'],
+      'Community':['Class schedule highlight of the week','Community event: charity workout Saturday','Member shoutout: most consistent this quarter','Team photo from last weekend\'s run club','Ask: what class time works best for you?']
+    },
+    hashtags:['#fitness #[brand] #gymlife #workout','#fitfam #[brand] #stronger','#healthylifestyle #[brand] #fitmotivation','#training #[brand] #gymcommunity','#motivation #[brand] #fitnessjourney'],
+    tips:['Post at 5:30–7am and 5–7pm — when people are deciding whether to train','Short form-demo videos (Reels/TikTok) reach 3–5× more people than photos','Celebrate members weekly — wins are your most shareable content','Run a monthly challenge with a hashtag to build a content flywheel']
+  },
+  realestate: {
+    pillars:['New listing','Sold & success','Market insights','Neighborhood','Buyer/Seller tips','Behind the scenes'],
+    ideas:{
+      'New listing':['Just listed: 3BR family home — carousel walkthrough','Price-drop alert: this just got more affordable','Open house this Saturday: full details','Video tour: 90-second walkthrough of the week','New listing alert with floor plan'],
+      'Sold & success':['SOLD in 9 days — here\'s how we priced it','Another happy family handed their keys','Seller testimonial: what the process felt like','Sold over asking: the 3 things that made it happen','Monthly scoreboard: homes sold this month'],
+      'Market insights':['What sold in [area] this month — with prices','Interest rates: what buyers should know right now','Rent vs buy in your neighborhood: the real math','Is it a buyer\'s or seller\'s market? This month\'s read','Average days-on-market trend for your area'],
+      'Neighborhood':['Top 5 coffee spots near this week\'s listing','Schools, parks, commute: neighborhood guide','Hidden gem street most people don\'t know','Weekend events around town','Local business spotlight: meet the bakery on main street'],
+      'Buyer/Seller tips':['5 things to check before your second viewing','How to make your offer stand out (without overpaying)','Staging tips that add real value','First-time buyer checklist — save this','What actually lowers your offer price'],
+      'Behind the scenes':['A day in the life: 3 showings, 2 calls, 1 deal','How we photograph a listing in 2 hours','Negotiation story: what happened behind the numbers','Meet the team: who answers your calls','Keys to contracts: what happens after "yes"']
+    },
+    hashtags:['#realestate #[brand] #justlisted #dreamhome','#homesforsale #[brand] #property','#realtor #[brand] #househunting','#investment #[brand] #propertymarket','#neighborhood #[brand] #local'],
+    tips:['Post listings Tuesday–Thursday evenings when buyers scroll after work','Always include price, beds/baths, and area in the first line of listing posts','Neighborhood content builds the local audience that later becomes your clients','Video walkthroughs get saved and shared — prioritize them over static photos']
+  },
+  dentist: {
+    pillars:['Patient education','Smile results','Team & clinic','Myth busting','Offers & booking','Fun & calm'],
+    ideas:{
+      'Patient education':['The 2-minute rule: how long to really brush','Flossing order: before or after brushing?','What sensitive teeth might be telling you','Electric vs manual: what the evidence says','Kids\' teeth: first dentist visit checklist'],
+      'Smile results':['Whitening before/after (patient approved)','Smile makeover: 3-step case study','Invisible aligners: week 1 vs week 30','Real patient story: from anxious to confident','Veneer results that still look natural'],
+      'Team & clinic':['Meet the hygienist: 30-second intro','Clinic tour: what to expect on your first visit','Sterilization: how we keep instruments safe','New equipment spotlight','Our front desk answers your 5 most common questions'],
+      'Myth busting':['Myth: harder brushing = cleaner teeth','Myth: bleeding gums mean stop flossing','Myth: whitening damages enamel (when done right)','Myth: baby teeth don\'t matter','Myth: you only need a dentist when it hurts'],
+      'Offers & booking':['New patient: exam + cleaning offer','Family booking day: book together, save together','Whitening special this month','0%-fee installment plans available','Direct booking: pick your slot online'],
+      'Fun & calm':['POV: you finally booked that appointment','Anxious patient? Here\'s what we do differently','Guess how many glasses of coffee stain teeth','Team picks: favorite toothpaste flavors','This or that: electric vs manual (staff edition)']
+    },
+    hashtags:['#dentalcare #[brand] #smilemakeover','#dentist #[brand] #oralhealth','#teethwhitening #[brand] #dentalfacts','#healthyteeth #[brand] #dentalhygiene','#smile #[brand] #dentalclinic'],
+    tips:['Education content builds trust with anxious patients — your highest-value content','Before/after photos need written patient consent; get it every time','Post in the evening: people book appointments while scrolling in bed','Answer every DM with a booking link — speed converts in healthcare']
+  },
+  salon: {
+    pillars:['Transformations','Trends & tutorials','Product love','Behind the chair','Offers & booking','Client stories'],
+    ideas:{
+      'Transformations':['Balayage before/after of the week','The big chop: courage and a new look','Color correction case: from box dye to beautiful','Men\'s cut glow-up','Wedding hair: from trial to aisle'],
+      'Trends & tutorials':['3 ways to style a bob (save this)','Trending now: the haircut everyone is asking for','How to make your blowout last 3 days','Heatless curls overnight — tutorial','What to ask your stylist for in 2026'],
+      'Product love':['Stylist picks: shampoo of the month','Why salon products cost more (and last longer)','3 products for frizz season','How much product is the right amount?','New arrival: what just hit our shelves'],
+      'Behind the chair':['A day in the life: 8 clients, 8 stories','How we mix a custom color formula','The consultation: what we ask before we cut','Saturday rush timelapse','Meet the newest member of our team'],
+      'Offers & booking':['Midweek special: 20% off Tuesdays','New client: first visit offer','Referral perk: bring a friend, both save','Seasonal package: color + treatment','Online booking is live — pick your chair'],
+      'Client stories':['Client testimonial: "I finally love my hair"','Regular client milestone: 5 years with us','First gray-hair embrace story','Why she travels 2 hours to this chair','Client Q&A: your questions, our answers']
+    },
+    hashtags:['#hairtransformation #[brand] #balayage','#hairgoals #[brand] #hairstylist','#salonlife #[brand] #behindthechair','#haircare #[brand] #hairtrends','#booknow #[brand] #local'],
+    tips:['Post transformations at lunch and 7–9pm — peak scroll times for beauty content','Before/after reels are your booking engine: always show the process, not just the result','Ask clients to tag you; reposts double your reach for free','Offer midweek discounts — they fill your quietest chair hours']
+  },
+  retail: {
+    pillars:['New arrivals','Styling & how-to','Behind the scenes','Social proof','Offers & drops','Community'],
+    ideas:{
+      'New arrivals':['New drop: this week\'s arrivals in 15 seconds','Restock alert: your favorite is back','Lookbook: 5 ways to wear the new collection','Size guide for the new fit','First look: what arrives next week'],
+      'Styling & how-to':['Style 1 piece 3 ways','How to build a capsule wardrobe from our rack','Budget outfit: complete look under 100','Seasonal color pairing guide','Gift guide: picks under each price point'],
+      'Behind the scenes':['Unboxing the delivery: what just came in','How we choose what to stock','Window display setup timelapse','Meet the team behind the counter','Packing your order: how it gets to you'],
+      'Social proof':['Customer photo of the week (repost)','Review spotlight: what buyers say','Bestseller list this month','Styling sent by you: customer roundup','Why our regulars keep coming back'],
+      'Offers & drops':['Weekend flash sale: 24 hours only','Loyalty card: every 5th purchase discounted','Bundle deal: buy 2, save 15%','Last-chance sizes: final markdown','Gift with purchase this week only'],
+      'Community':['Ask: what should we stock next?','Local shoutout: our favorite neighbor shop','Event: in-store styling evening','Charity: proceeds from this weekend\'s sales','Vote: which colorway should we reorder?']
+    },
+    hashtags:['#shoplocal #[brand] #newarrivals','#fashion #[brand] #ootd','#boutique #[brand] #styleinspo','#sale #[brand] #shopnow','#smallbusiness #[brand] #supportlocal'],
+    tips:['Post new arrivals the day they hit the floor — urgency sells','Show products worn/used, not just on the shelf: context converts','User-generated content is free and outsells studio shots — collect it actively','Flash sales on stories create urgency; keep a 24-hour limit']
+  },
+  generic: {
+    pillars:['Value & tips','Behind the scenes','Social proof','Offer & CTA','Story & mission','Fun & engagement'],
+    ideas:{
+      'Value & tips':['3 tips your customers wish they knew','Common mistake in our industry (and the fix)','Save this: quick how-to checklist','Answer the question we get asked most','Myth vs fact in our field'],
+      'Behind the scenes':['How the sausage is made: our process in 30 seconds','Meet the team: who does what','A day in the life at [brand]','Tools we can\'t live without','What we\'re working on this week'],
+      'Social proof':['Customer review of the week','Before/after: what working with us looks like','Case study: problem → process → result','Repost a customer story','Numbers that matter: milestones this month'],
+      'Offer & CTA':['This month\'s offer, one clear line','Limited spots: what\'s closing Friday','New: what just launched','Bundle: two favorites, one price','Newsletter: join for the good stuff first'],
+      'Story & mission':['Why we started [brand]','The value we refuse to compromise on','Our favorite failure and what it taught us','What our customers teach us','Where we\'re headed next year'],
+      'Fun & engagement':['This or that: pick a side','POV: your first day as our customer','Guess the result of this experiment','Caption contest: funniest answer wins','Tag someone who needs this']
+    },
+    hashtags:['#[brand] #smallbusiness #tips','#behindthescenes #[brand] #local','#customersuccess #[brand] #review','#offer #[brand] #shopsmall','#community #[brand] #supportlocal'],
+    tips:['Pick 2–3 pillars and repeat them weekly — consistency beats variety','Every post needs one clear action: save, share, comment, or click','Batch-create: one hour of filming = two weeks of posts','Track saves and shares, not likes — they predict sales']
+  }
+};
+
+const PLATFORM_TIMES = {
+  instagram:{name:'Instagram', time:'7:00pm'},
+  facebook: {name:'Facebook',  time:'1:00pm'},
+  tiktok:   {name:'TikTok',    time:'9:00pm'},
+  linkedin: {name:'LinkedIn',  time:'8:30am'}
+};
+
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function rng(){ seed = (seed*9301+49297)%233280; return seed/233280; }
+function pick(arr){ return arr[Math.floor(rng()*arr.length)]; }
+
+function brandTag(){ return (F('brandName').value.replace(/[^a-zA-Z]/g,'').toLowerCase()||'yourbrand'); }
+
+function buildCalendar(){
+  const niche = NICHES[F('niche').value];
+  const days = new Date(+F('year').value, F('month').selectedIndex+1, 0).getDate();
+  const out = [];
+  for(let d=1; d<=days; d++){
+    const pillar = niche.pillars[(d-1) % niche.pillars.length];
+    const idea = pick(niche.ideas[pillar]);
+    const tags = pick(niche.hashtags).replace('#[brand]', '#'+brandTag()).replace('# ','#').trim();
+    const activePlats = Object.entries(platforms).filter(([k,v])=>v).map(([k])=>k);
+    const plat = pick(activePlats.length?activePlats:['instagram']);
+    out.push({day:d, pillar, idea, tags, plat});
+  }
+  return out;
+}
+
+function render(regen){
+  if(regen) seed = Math.floor(Math.random()*233280)+1;
+  const niche = NICHES[F('niche').value];
+  const brand = F('brandName').value || 'Your Business';
+  const handle = F('brandHandle').value;
+  const monthName = MONTHS[F('month').selectedIndex];
+  const year = F('year').value;
+  const cal = buildCalendar();
+
+  F('p-brand').textContent = brand;
+  F('p-handle').textContent = handle || '';
+  F('p-sub').textContent = `${monthName} ${year} · ${cal.length} days of content · generated for ${brand}`;
+
+  F('p-pillars').innerHTML =
+    `<h4>Content pillars</h4><p>${niche.pillars.map(p=>`<span style="display:inline-block;background:#fdeef3;color:#e84393;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;margin:2px 4px 2px 0">${p}</span>`).join('')}</p>`;
+
+  F('p-rows').innerHTML = cal.map(r=>`
+    <tr>
+      <td class="day">${monthName.slice(0,3)} ${r.day}</td>
+      <td><span class="tag">${r.pillar}</span><br><span class="time">${PLATFORM_TIMES[r.plat].name}</span></td>
+      <td class="cap">${r.idea} <br> <span class="hash">Caption: "${r.idea.toLowerCase()}" — tell them what to do next (save/comment/book).</span></td>
+      <td class="hash">${r.tags}</td>
+      <td class="time">${PLATFORM_TIMES[r.plat].time}</td>
+    </tr>`).join('');
+
+  F('p-strategy').innerHTML = '<h4>Posting strategy</h4>' + niche.tips.map(t=>`<div class="tip">${t}</div>`).join('');
+}
+
+function copyPlan(){
+  const rows = [...document.querySelectorAll('#p-rows tr')].map(tr=>{
+    const tds = tr.querySelectorAll('td');
+    return `${tds[0].textContent} | ${tds[1].textContent.replace(/\s+/g,' ').trim()} | ${tds[2].textContent.split('Caption:')[0].trim()} | ${tds[3].textContent.trim()} | ${tds[4].textContent.trim()}`;
+  }).join('\n');
+  const text = `${F('p-brand').textContent} — Content Plan ${F('p-sub').textContent}\n\nDay | Type | Idea | Hashtags | Best time\n${rows}`;
+  navigator.clipboard.writeText(text).then(()=>toast('Plan copied ✓'));
+}
+
+function renderPlatforms(){
+  F('platforms').innerHTML = Object.entries(PLATFORM_TIMES).map(([k,p])=>
+    `<span class="pill ${platforms[k]?'':'off'}" onclick="togglePlat('${k}')">${p.name}</span>`).join('');
+}
+function togglePlat(k){ platforms[k]=!platforms[k]; renderPlatforms(); render(); }
+
+function toast(msg){
+  const el=F('toast'); el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2000);
+}
+
+(function init(){
+  F('month').innerHTML = MONTHS.map((m,i)=>`<option>${m}</option>`).join('');
+  F('month').selectedIndex = new Date().getMonth();
+  F('year').value = new Date().getFullYear();
+  renderPlatforms();
+  render(true);
+})();
+</script>
+</body>
+</html>
