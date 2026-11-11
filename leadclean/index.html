@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeadClean — Scraper Data Cleaner & Normalizer</title>
+<style>
+:root{
+  --bg:#0f1117;--panel:#181b24;--panel2:#1f2330;--border:#2a2f3f;
+  --text:#e8eaf2;--muted:#8b90a3;--accent:#0984e3;--accent2:#74b9ff;
+  --green:#00b894;--yellow:#fdcb6e;--red:#e17055;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.wrap{max-width:1100px;margin:0 auto;padding:32px 24px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:22px;margin-bottom:4px}
+.logo .mark{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:17px}
+.tagline{font-size:13px;color:var(--muted);margin-bottom:28px}
+h2.sec{font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin:22px 0 10px}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+textarea,input,select{width:100%;background:var(--panel2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 12px;font-size:14px;outline:none;font-family:inherit}
+textarea:focus,select:focus{border-color:var(--accent)}
+textarea{min-height:180px;resize:vertical;font-family:ui-monospace,Consolas,monospace;font-size:13px}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:11px 20px;font-size:14px;font-weight:600;cursor:pointer;transition:.15s}
+.btn:hover{filter:brightness(1.15)}
+.btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn.ghost:hover{border-color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0}
+.stat{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.stat b{display:block;font-size:24px;margin-bottom:2px}
+.stat span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.stat.ok b{color:var(--green)}.stat.warn b{color:var(--yellow)}.stat.bad b{color:var(--red)}.stat.neutral b{color:var(--accent2)}
+
+.tablewrap{overflow:auto;border:1px solid var(--border);border-radius:10px;max-height:460px}
+table{width:100%;border-collapse:collapse;font-size:13px;background:var(--panel)}
+th{position:sticky;top:0;background:var(--panel2);text-align:left;padding:10px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid #232735;vertical-align:top}
+tr.dup td{opacity:.45}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.5px}
+.badge.ok{background:rgba(0,184,148,.15);color:var(--green)}
+.badge.bad{background:rgba(225,112,85,.15);color:var(--red)}
+.badge.warn{background:rgba(253,203,110,.15);color:var(--yellow)}
+.empty{padding:40px;text-align:center;color:var(--muted);font-size:14px}
+.hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.6}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--green);color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;opacity:0;transition:.3s;pointer-events:none}
+.toast.show{opacity:1}
+.actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo"><div class="mark">📇</div>LeadClean</div>
+  <div class="tagline">Clean, deduplicate & validate scraped leads — 100% in your browser. Nothing uploads.</div>
+
+  <h2 class="sec">1 · Paste your scraped data</h2>
+  <textarea id="input" placeholder="Paste CSV, TSV, semicolon or pipe-separated data. Example:
+
+Name,Email,Phone,Company
+Jane Doe, JANE@Globex.com , +971 50 123 4567, Globex
+jane doe, jane@globex.com, 0501234567, Globex
+John Smith, john@@bad.com, not-a-phone, Acme"></textarea>
+  <div class="hint">Auto-detects the delimiter and figures out which column is which (email / phone / name / company) by content. First row is treated as a header if it looks like one.</div>
+
+  <h2 class="sec">2 · Options</h2>
+  <div class="row">
+    <div>
+      <label for="country">Phone country (for normalization)</label>
+      <select id="country" onchange="clean()">
+        <option value="+971">🇦🇪 UAE +971</option>
+        <option value="+1">🇺🇸 US/CA +1</option>
+        <option value="+44">🇬🇧 UK +44</option>
+        <option value="+91">🇮🇳 India +91</option>
+        <option value="+49">🇩🇪 Germany +49</option>
+        <option value="+61">🇦🇺 Australia +61</option>
+        <option value="">No country prefix</option>
+      </select>
+    </div>
+    <div>
+      <label for="dedupeBy">Deduplicate by</label>
+      <select id="dedupeBy" onchange="clean()">
+        <option value="email">Email</option>
+        <option value="phone">Phone</option>
+        <option value="both">Email AND phone</option>
+      </select>
+    </div>
+    <div>
+      <label for="keepInvalid">Invalid rows</label>
+      <select id="keepInvalid" onchange="clean()">
+        <option value="keep">Keep & flag</option>
+        <option value="drop">Drop them</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn" onclick="clean()">✨ Clean my data</button>
+    <button class="btn ghost" id="copyBtn" onclick="copyCSV()" disabled>📋 Copy CSV</button>
+    <button class="btn ghost" id="dlBtn" onclick="downloadCSV()" disabled>⬇ Download CSV</button>
+    <button class="btn ghost" onclick="loadSample()">Load sample data</button>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <h2 class="sec">3 · Cleaned output</h2>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>#</th><th>Email</th><th>Phone</th><th>Name</th><th>Company</th><th>Status</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="empty" id="empty">Paste data above and click “Clean my data”.</div>
+  </div>
+  <div class="hint">Duplicated rows are shown faded and excluded from the export. Emails are lowercased & trimmed; phones are normalized to international format with your chosen country code.</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const F = id => document.getElementById(id);
+let cleanRows = [];
+
+const EMAIL_RE = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/;
+const EMAIL_HINT = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i;
+const PHONE_DIGITS = /^[+()\d\s-]{6,}$/;
+
+function detectDelimiter(text){
+  const line = text.split(/\r?\n/).find(l=>l.trim()) || '';
+  const counts = [',',';','\t','|'].map(d=>[d, (line.match(new RegExp('\\'+(d==='\t'?'\\t':d==='|'?'|':d),'g'))||[]).length]);
+  counts.sort((a,b)=>b[1]-a[1]);
+  return counts[0][1] > 0 ? counts[0][0] : null;
+}
+
+function looksLikeHeader(cells){
+  return cells.some(c => /^(name|email|e-mail|phone|mobile|company|business|first|last|title|website|address|contact)/i.test(c.trim()))
+    && !cells.some(c => EMAIL_HINT.test(c) || PHONE_DIGITS.test(c) && c.replace(/\D/g,'').length >= 7);
+}
+
+function classifyCols(sampleRows){
+  const cols = {email:-1, phone:-1, name:-1, company:-1};
+  const nCol = Math.max(...sampleRows.map(r=>r.length));
+  const score = Array.from({length:nCol},()=>({email:0,phone:0,name:0,company:0}));
+  sampleRows.forEach(r=>{
+    r.forEach((c,i)=>{
+      const v = c.trim();
+      if(!v) return;
+      if(EMAIL_HINT.test(v)) score[i].email++;
+      else if(PHONE_DIGITS.test(v) && v.replace(/\D/g,'').length>=7) score[i].phone++;
+      else if(/\b(inc|llc|ltd|gmbh|llp|co\.|corp|company|group|solutions|studio|agency|trading|est|fze)\b/i.test(v)) score[i].company++;
+      else if(v.split(/\s+/).length<=4 && /^[a-z\u00c0-\u024f' .-]+$/i.test(v)) score[i].name++;
+    });
+  });
+  const assign = (key)=>{
+    let best=-1, bestScore=0;
+    score.forEach((s,i)=>{ if(s[key]>bestScore && !Object.values(cols).includes(i)){best=i;bestScore=s[key];} });
+    if(best>=0) cols[key]=best;
+  };
+  ['email','phone','company','name'].forEach(assign);
+  return cols;
+}
+
+function normalizeEmail(v){
+  return v.trim().toLowerCase().replace(/\s+/g,'');
+}
+function normalizePhone(v, cc){
+  let d = v.replace(/[^\d+]/g,'');
+  const plus = d.startsWith('+');
+  d = d.replace(/\+/g,'');
+  if(d.startsWith('00')) d = d.slice(2);
+  if(cc && !plus && d.length===9 && cc==='+971' && !d.startsWith('5')) d = d; // local mobiles start with 5
+  if(cc && !plus && d.length<=10) d = cc.replace('+','') + d.replace(/^0/,'');
+  if(!d.startsWith('+')) d = '+' + d;
+  return d;
+}
+function titleCase(v){
+  return v.trim().replace(/\s+/g,' ')
+    .split(' ').map(w=>w ? w[0].toUpperCase()+w.slice(1).toLowerCase() : '').join(' ');
+}
+
+function clean(){
+  const raw = F('input').value.trim();
+  const tbody = F('rows');
+  cleanRows = [];
+  if(!raw){ toast('Paste some data first'); return; }
+
+  const delim = detectDelimiter(raw);
+  let lines = raw.split(/\r?\n/).filter(l=>l.trim());
+  if(!delim){
+    // line-based: treat each line as a record, extract email/phone by pattern
+    lines = lines.map(l=>[l]);
+  }
+  let rows = lines.map(l=>delim ? l.split(delim).map(c=>c.trim().replace(/^"|"$/g,'')) : [l.trim()]);
+  if(rows.length && looksLikeHeader(rows[0])) rows = rows.slice(1);
+  if(rows.length < 1){ toast('No data rows found'); return; }
+
+  const cols = classifyCols(rows.slice(0,50));
+  const cc = F('country').value;
+  const dedupeBy = F('dedupeBy').value;
+  const keepInvalid = F('keepInvalid').value;
+
+  const seen = new Set();
+  let stats = {total:0, dups:0, badEmail:0, badPhone:0, missing:0};
+
+  rows.forEach(r=>{
+    stats.total++;
+    const get = k => cols[k]>=0 ? (r[cols[k]]||'').trim() : '';
+    let email = normalizeEmail(get('email'));
+    let phoneRaw = get('phone');
+    let phone = phoneRaw ? normalizePhone(phoneRaw, cc) : '';
+    let name = titleCase(get('name'));
+    let company = get('company');
+    if(!company && name && /\b(inc|llc|ltd|gmbh|llp|co\.|corp|group|trading|est|fze)\b/i.test(name)){ company=name; name=''; }
+
+    const emailOk = !email || EMAIL_RE.test(email);
+    const phoneOk = !phone || phone.replace(/\D/g,'').length>=7;
+    if(email && !emailOk) stats.badEmail++;
+    if(phone && !phoneOk) stats.badPhone++;
+
+    const key = dedupeBy==='both' ? (email||'')+'|'+(phone||'') : (dedupeBy==='phone' ? phone : email);
+    const isDup = key && key.replace(/\|/g,'') && seen.has(key);
+    if(key && key.replace(/\|/g,'')) seen.add(key);
+    if(isDup){ stats.dups++; return; }
+
+    const invalid = (email && !emailOk) || (phone && !phoneOk);
+    if(invalid && keepInvalid==='drop'){ return; }
+    if(!email && !phone && !name && !company) return;
+
+    cleanRows.push({email, phone, name, company, emailOk, phoneOk, invalid});
+  });
+
+  const kept = cleanRows.length;
+  F('stats').innerHTML = `
+    <div class="stat neutral"><b>${stats.total}</b><span>Rows in</span></div>
+    <div class="stat ok"><b>${cleanRows.filter(r=>!r.invalid).length}</b><span>Valid leads</span></div>
+    <div class="stat warn"><b>${stats.dups}</b><span>Duplicates removed</span></div>
+    <div class="stat bad"><b>${cleanRows.filter(r=>r.invalid).length}</b><span>Flagged invalid</span></div>
+    <div class="stat neutral"><b>${kept}</b><span>Rows out</span></div>`;
+
+  tbody.innerHTML = cleanRows.map((r,i)=>`
+    <tr class="${r.invalid?'dup':''}">
+      <td>${i+1}</td>
+      <td>${r.email ? esc(r.email) : '<span style="color:var(--muted)">—</span>'} ${r.email && !r.emailOk ? '<span class="badge bad">bad email</span>':''}</td>
+      <td>${r.phone ? esc(r.phone) : '<span style="color:var(--muted)">—</span>'} ${r.phone && !r.phoneOk ? '<span class="badge bad">bad phone</span>':''}</td>
+      <td>${esc(r.name)}</td>
+      <td>${esc(r.company)}</td>
+      <td>${r.invalid ? '<span class="badge warn">check</span>' : '<span class="badge ok">clean</span>'}</td>
+    </tr>`).join('');
+  F('empty').style.display = cleanRows.length ? 'none' : 'block';
+  F('copyBtn').disabled = F('dlBtn').disabled = !cleanRows.length;
+}
+
+function csv(){
+  const q = v => '"'+String(v).replace(/"/g,'""')+'"';
+  return 'Email,Phone,Name,Company\n' + cleanRows.map(r=>[r.email,r.phone,r.name,r.company].map(q).join(',')).join('\n');
+}
+function copyCSV(){
+  navigator.clipboard.writeText(csv()).then(()=>toast('CSV copied ✓'));
+}
+function downloadCSV(){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv()],{type:'text/csv'}));
+  a.download = 'cleaned-leads.csv'; a.click();
+  toast('Downloaded ✓');
+}
+function loadSample(){
+  F('input').value = [
+    'Name,Email,Phone,Company',
+    'Jane Doe, JANE@Globex.com , +971 50 123 4567, Globex Trading LLC',
+    'jane doe, jane@globex.com, 0501234567, Globex Trading LLC',
+    'John Smith, john.smith@acme.io, (555) 010-2030, Acme Inc',
+    'MARY  LEE , mary@@bad.com, not-a-phone, Lee Group',
+    'Ahmed Ali, ahmed@fze.ae, 00971 4 555 8899, Al Fze Est',
+  ].join('\n');
+  clean();
+}
+function esc(s){ return String(s).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+function toast(msg){
+  const el=F('toast'); el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2000);
+}
+</script>
+</body>
+</html>
