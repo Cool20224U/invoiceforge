@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProposalForge — Proposals, Quotes & Contracts for Freelancers</title>
+<style>
+:root{
+  --bg:#0f1117;--panel:#181b24;--panel2:#1f2330;--border:#2a2f3f;
+  --text:#e8eaf2;--muted:#8b90a3;--accent:#00b894;--accent2:#55efc4;
+  --red:#e17055;--radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.app{display:grid;grid-template-columns:440px 1fr;min-height:100vh}
+@media(max-width:1000px){.app{grid-template-columns:1fr}.preview-wrap{order:-1}}
+
+/* ---------- Sidebar ---------- */
+.sidebar{background:var(--panel);border-right:1px solid var(--border);padding:28px;overflow-y:auto;max-height:100vh}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px;margin-bottom:6px}
+.logo .mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px}
+.tagline{font-size:12px;color:var(--muted);margin-bottom:22px}
+h2.sec{font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin:24px 0 12px}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+input,select,textarea{width:100%;background:var(--panel2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:9px 12px;font-size:14px;outline:none;margin-bottom:12px;font-family:inherit}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer;transition:.15s}
+.btn:hover{filter:brightness(1.1)}
+.btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn.ghost:hover{border-color:var(--accent)}
+.btn.block{width:100%;margin-top:6px}
+
+.doctype{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:6px}
+.doctype button{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:12px 6px;color:var(--muted);cursor:pointer;font-size:13px;font-weight:600;transition:.15s}
+.doctype button.active{border-color:var(--accent);color:var(--accent2);background:rgba(0,184,148,.08)}
+
+.item{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;position:relative}
+.item .del{position:absolute;top:10px;right:10px;background:none;border:none;color:var(--red);font-size:16px;cursor:pointer}
+.item input{margin-bottom:8px}
+.item input:last-child{margin-bottom:0}
+
+.clause{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.clause b{font-size:13px;display:block;margin-bottom:3px}
+.clause span{font-size:12px;color:var(--muted)}
+.clause .add{background:var(--accent);border:none;color:#fff;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.sig-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tiny{font-size:11px;color:var(--muted);margin-top:2px;display:block}
+
+/* ---------- Preview ---------- */
+.preview-wrap{padding:34px;display:flex;flex-direction:column;align-items:center;background:radial-gradient(1000px 500px at 80% -10%,rgba(0,184,148,.10),transparent)}
+.paper{width:100%;max-width:800px;background:#fff;color:#1a1a2e;border-radius:6px;box-shadow:0 20px 60px rgba(0,0,0,.5);padding:56px}
+.paper *{color:inherit}
+.p-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:42px}
+.p-brand{font-size:26px;font-weight:800}
+.p-brand small{display:block;font-size:12px;font-weight:400;color:#666;margin-top:6px;white-space:pre-line;line-height:1.6}
+.p-title{font-size:34px;font-weight:300;letter-spacing:3px;color:#00b894;text-transform:uppercase;text-align:right}
+.p-sub{text-align:right;font-size:13px;color:#555;margin-top:8px;line-height:1.8}
+.p-parties{display:flex;justify-content:space-between;gap:30px;margin-bottom:40px}
+.p-parties h4{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#999;margin-bottom:10px}
+.p-parties .val{font-size:14px;line-height:1.7;white-space:pre-line}
+.p-intro{font-size:14px;line-height:1.8;color:#333;margin-bottom:34px;white-space:pre-line}
+table.items{width:100%;border-collapse:collapse;margin-bottom:28px}
+table.items th{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:#999;text-align:left;padding:10px 8px;border-bottom:2px solid #e8e8f2}
+table.items td{padding:12px 8px;font-size:14px;border-bottom:1px solid #f0f0f6;vertical-align:top}
+table.items .r{text-align:right}
+table.items .desc{color:#555;font-size:13px}
+.p-totals{display:flex;justify-content:flex-end;margin-bottom:36px}
+.p-totals table{font-size:14px}
+.p-totals td{padding:6px 12px}
+.p-totals .grand td{border-top:2px solid #1a1a2e;font-weight:800;font-size:17px;color:#00b894}
+.p-clauses{margin-bottom:40px}
+.p-clauses h4{font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:#999;margin-bottom:14px}
+.p-clause{margin-bottom:16px}
+.p-clause b{font-size:13px}
+.p-clause p{font-size:13px;line-height:1.8;color:#444;margin-top:3px}
+.p-sigs{display:grid;grid-template-columns:1fr 1fr;gap:40px;border-top:1px solid #e8e8f2;padding-top:30px}
+.sig .name{font-size:22px;font-style:italic;font-weight:600;color:#1a1a2e;font-family:'Segoe Script','Brush Script MT',cursive;min-height:30px}
+.sig .line{border-bottom:1px solid #1a1a2e;margin:14px 0 6px}
+.sig .who{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:#999}
+.sig .date{font-size:12px;color:#555;margin-top:4px}
+.statusbar{display:flex;gap:12px;align-items:center;margin-bottom:20px;width:100%;max-width:800px;justify-content:space-between}
+.statusbar .hint{font-size:13px;color:var(--muted)}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;opacity:0;transition:.3s;pointer-events:none}
+.toast.show{opacity:1}
+@media print{
+  body{background:#fff}
+  .sidebar,.statusbar,.toast{display:none!important}
+  .app{display:block}
+  .preview-wrap{padding:0;background:none}
+  .paper{box-shadow:none;border-radius:0;max-width:100%;padding:24px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="logo"><div class="mark">📄</div>ProposalForge</div>
+    <div class="tagline">Proposals, quotes & contracts — in minutes.</div>
+
+    <h2 class="sec">Document type</h2>
+    <div class="doctype">
+      <button id="dt-proposal" class="active" onclick="setDocType('proposal')">Proposal</button>
+      <button id="dt-quote" onclick="setDocType('quote')">Quote</button>
+      <button id="dt-contract" onclick="setDocType('contract')">Contract</button>
+    </div>
+
+    <h2 class="sec">Your business</h2>
+    <label for="bizName">Business name</label>
+    <input id="bizName" placeholder="Acme Studio" oninput="render()">
+    <label for="bizDetails">Address / contact</label>
+    <textarea id="bizDetails" rows="3" placeholder="123 Main St&#10;hello@acme.com" oninput="render()"></textarea>
+
+    <h2 class="sec">Document details</h2>
+    <div class="row">
+      <div><label for="docNo">Number</label><input id="docNo" oninput="render()"></div>
+      <div><label for="docDate">Date</label><input id="docDate" type="date" oninput="render()"></div>
+      <div><label for="validUntil">Valid until</label><input id="validUntil" type="date" oninput="render()"></div>
+    </div>
+    <label for="projectTitle">Project title</label>
+    <input id="projectTitle" placeholder="Website redesign for Globex" oninput="render()">
+    <div class="row">
+      <div><label for="currency">Currency</label>
+        <select id="currency" onchange="render()">
+          <option value="$">$ USD</option><option value="€">€ EUR</option>
+          <option value="£">£ GBP</option><option value="₹">₹ INR</option>
+          <option value="R$">R$ BRL</option><option value="¥">¥ JPY</option>
+        </select>
+      </div>
+      <div><label for="taxRate">Tax rate (%)</label><input id="taxRate" type="number" value="0" min="0" step="0.1" oninput="render()"></div>
+    </div>
+
+    <h2 class="sec">Client</h2>
+    <label for="clientName">Client name</label>
+    <input id="clientName" placeholder="Globex Inc." oninput="render()">
+    <label for="clientDetails">Client details</label>
+    <textarea id="clientDetails" rows="3" placeholder="456 Oak Ave&#10;jane@globex.com" oninput="render()"></textarea>
+
+    <h2 class="sec">Scope of work / items</h2>
+    <div id="items"></div>
+    <button class="btn ghost block" onclick="addItem()">+ Add item</button>
+
+    <h2 class="sec">Clause library</h2>
+    <div id="clauseLib"></div>
+    <label for="customClause">Custom clause</label>
+    <div class="row">
+      <input id="customClause" placeholder="Clause text…">
+      <button class="btn" style="margin-bottom:12px;white-space:nowrap" onclick="addCustomClause()">Add</button>
+    </div>
+
+    <h2 class="sec">Signatures</h2>
+    <div class="sig-row">
+      <div><label for="sigProvider">You (type name)</label><input id="sigProvider" placeholder="John Smith" oninput="render()"></div>
+      <div><label for="sigClient">Client (type name)</label><input id="sigClient" placeholder="Jane Doe" oninput="render()"></div>
+    </div>
+
+    <h2 class="sec">Data</h2>
+    <button class="btn ghost block" onclick="saveDraft()">💾 Save draft</button>
+    <button class="btn ghost block" onclick="loadDraft()">📂 Load draft</button>
+    <button class="btn ghost block" onclick="clearAll()" style="color:var(--red)">Clear everything</button>
+  </aside>
+
+  <main class="preview-wrap">
+    <div class="statusbar">
+      <span class="hint">Live preview — click <b>Download PDF</b> and choose “Save as PDF”.</span>
+      <button class="btn" onclick="window.print()">⬇ Download PDF</button>
+    </div>
+    <div class="paper">
+      <div class="p-head">
+        <div>
+          <div class="p-brand" id="p-biz">Your Business</div>
+          <small id="p-bizdet"></small>
+        </div>
+        <div>
+          <div class="p-title" id="p-title">Proposal</div>
+          <div class="p-sub" id="p-meta"></div>
+        </div>
+      </div>
+      <div class="p-parties">
+        <div><h4>Prepared by</h4><div class="val" id="p-provider"></div></div>
+        <div style="text-align:right"><h4>Prepared for</h4><div class="val" id="p-client"></div></div>
+      </div>
+      <div class="p-intro" id="p-intro"></div>
+      <table class="items">
+        <thead><tr><th>Deliverable</th><th class="r">Qty</th><th class="r">Rate</th><th class="r">Amount</th></tr></thead>
+        <tbody id="p-rows"></tbody>
+      </table>
+      <div class="p-totals"><table id="p-totals"></table></div>
+      <div class="p-clauses" id="p-clauses"></div>
+      <div class="p-sigs">
+        <div class="sig"><div class="name" id="p-sigp"></div><div class="line"></div><div class="who" id="p-sigpw"></div><div class="date" id="p-sigpd"></div></div>
+        <div class="sig"><div class="name" id="p-sigc"></div><div class="line"></div><div class="who" id="p-sigcw"></div><div class="date" id="p-sigcd"></div></div>
+      </div>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const F = id => document.getElementById(id);
+const fmt = n => (Math.round(n*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+let docType = 'proposal';
+let items = [];
+let activeClauses = [];
+
+const CLAUSES = {
+  proposal: {
+    scope: {t:'Scope of work', p:'The Provider will deliver the items listed above. Any work outside this scope will be quoted separately and requires written approval from the Client.'},
+    revisions: {t:'Revisions', p:'The quoted price includes two rounds of revisions per deliverable. Additional revisions will be billed at the Provider\'s standard hourly rate.'},
+    timeline: {t:'Timeline', p:'The project timeline begins once the Client provides all required materials, access, and feedback. Delays in Client input will shift the delivery date accordingly.'},
+    payment: {t:'Payment terms', p:'50% deposit due upon signing, remaining 50% due on delivery. Invoices are payable within 14 days by bank transfer.'},
+    validity: {t:'Validity', p:'This proposal is valid until the date shown above. Pricing may change for work scheduled after that date.'}
+  },
+  quote: {
+    pricing: {t:'Pricing', p:'All prices are quoted in the currency shown and are exclusive of expenses unless stated otherwise. Travel and material costs, if required, will be pre-approved separately.'},
+    validity: {t:'Quote validity', p:'This quote is firm until the validity date shown above. After that date, pricing is subject to review.'},
+    payment: {t:'Payment terms', p:'Payment is due within 14 days of the invoice date. Late payments may accrue interest at 1.5% per month.'},
+    changes: {t:'Change orders', p:'Any change to the quoted scope will be documented in a written change order with adjusted pricing and timeline before work begins.'}
+  },
+  contract: {
+    parties: {t:'Agreement', p:'This agreement is made between the Provider and the Client named above. By signing, both parties accept the terms below.'},
+    ownership: {t:'Intellectual property', p:'Upon full payment, the Client owns all deliverables created under this agreement. The Provider retains the right to display the work in a portfolio unless a written NDA says otherwise.'},
+    confidentiality: {t:'Confidentiality', p:'Both parties agree to keep confidential all non-public information shared during this engagement, during and after the project term.'},
+    termination: {t:'Termination', p:'Either party may terminate this agreement with 14 days written notice. The Client pays for all work completed up to the termination date.'},
+    liability: {t:'Limitation of liability', p:'The Provider\'s total liability under this agreement is limited to the total fees paid. Neither party is liable for indirect or consequential damages.'},
+    law: {t:'Governing law', p:'This agreement is governed by the laws of the Provider\'s country of residence. Disputes will first be addressed in good-faith negotiation.'}
+  }
+};
+
+const META = {
+  proposal: {no:'PRO', title:'Proposal', intro:() =>`Thank you for the opportunity to work with you. Based on our discussion, here is my proposed approach and pricing for this project. I look forward to your feedback.`},
+  quote:    {no:'QUO', title:'Quote',    intro:() =>`Please find below the quoted pricing for the requested work. This quote covers the scope described; anything not listed is out of scope.`},
+  contract:  {no:'CON', title:'Contract',intro:() =>`This contract sets out the terms under which the Provider will deliver the services described below to the Client.`}
+};
+
+function setDocType(t){
+  docType = t;
+  ['proposal','quote','contract'].forEach(k=>F('dt-'+k).classList.toggle('active',k===t));
+  activeClauses = Object.keys(CLAUSES[t]).slice(0, docType==='contract'?3:2);
+  renderClauseLib(); render();
+}
+function toggleClause(k){
+  const i = activeClauses.indexOf(k);
+  if(i>=0) activeClauses.splice(i,1); else activeClauses.push(k);
+  renderClauseLib(); render();
+}
+function addCustomClause(){
+  const v = F('customClause').value.trim();
+  if(!v) return;
+  const key = 'custom-'+Date.now();
+  CLAUSES[docType][key] = {t:'Additional term', p:v};
+  activeClauses.push(key);
+  F('customClause').value='';
+  renderClauseLib(); render();
+}
+function renderClauseLib(){
+  F('clauseLib').innerHTML = Object.entries(CLAUSES[docType]).map(([k,c])=>`
+    <div class="clause">
+      <div><b>${esc(c.t)}</b><span>${esc(c.p.slice(0,80))}…</span></div>
+      <button class="add" onclick="toggleClause('${k}')">${activeClauses.includes(k)?'− Remove':'+ Add'}</button>
+    </div>`).join('');
+}
+
+function addItem(){ items.push({desc:'Deliverable description',qty:1,rate:0}); renderItems(); render(); }
+function delItem(i){ items.splice(i,1); renderItems(); render(); }
+function renderItems(){
+  F('items').innerHTML = items.map((it,i)=>`
+    <div class="item">
+      <button class="del" onclick="delItem(${i})" title="Remove">✕</button>
+      <input placeholder="Deliverable / item" value="${esc(it.desc)}" oninput="items[${i}].desc=this.value;render()">
+      <div class="row">
+        <input type="number" min="0" step="any" value="${it.qty}" placeholder="Qty" oninput="items[${i}].qty=+this.value||0;render()">
+        <input type="number" min="0" step="any" value="${it.rate}" placeholder="Rate" oninput="items[${i}].rate=+this.value||0;render()">
+      </div>
+    </div>`).join('');
+}
+
+function totals(){
+  const sub = items.reduce((s,it)=>s+(it.qty*it.rate),0);
+  const tax = sub * ((+F('taxRate').value||0)/100);
+  return {sub, tax, total: sub + tax};
+}
+
+function esc(s){ return String(s).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+
+function render(){
+  const m = META[docType], c = F('currency').value;
+  const money = n => `${c}${fmt(n)}`;
+  const t = totals();
+
+  F('docNo').value = F('docNo').value || m.no+'-001';
+  F('docDate').value = F('docDate').value || new Date().toISOString().slice(0,10);
+
+  F('p-biz').textContent = F('bizName').value || 'Your Business';
+  F('p-bizdet').textContent = F('bizDetails').value;
+  F('p-title').textContent = m.title;
+  F('p-meta').innerHTML =
+    `<b>No.</b> ${esc(F('docNo').value)}<br>` +
+    (F('projectTitle').value ? `<b>${esc(F('projectTitle').value)}</b><br>`:'') +
+    `<b>Date</b> ${esc(F('docDate').value)}` +
+    (F('validUntil').value ? ` &nbsp;·&nbsp; <b>Valid until</b> ${esc(F('validUntil').value)}`:'');
+  F('p-provider').textContent = (F('bizName').value + '\n' + F('bizDetails').value).trim() || 'Provider';
+  F('p-client').textContent = (F('clientName').value + '\n' + F('clientDetails').value).trim() || 'Client';
+  F('p-intro').textContent = m.intro();
+
+  F('p-rows').innerHTML = items.map(it=>`
+    <tr>
+      <td class="desc">${esc(it.desc) || '—'}</td>
+      <td class="r">${it.qty}</td>
+      <td class="r">${money(it.rate)}</td>
+      <td class="r">${money(it.qty*it.rate)}</td>
+    </tr>`).join('') || '<tr><td colspan="4" class="desc">Add deliverables to get started…</td></tr>';
+
+  let rows = `<tr><td>Subtotal</td><td class="r">${money(t.sub)}</td></tr>`;
+  if (t.tax > 0) rows += `<tr><td>Tax (${F('taxRate').value}%)</td><td class="r">${money(t.tax)}</td></tr>`;
+  rows += `<tr class="grand"><td>Total</td><td class="r">${money(t.total)}</td></tr>`;
+  F('p-totals').innerHTML = rows;
+
+  F('p-clauses').innerHTML = activeClauses.length
+    ? '<h4>Terms</h4>' + activeClauses.map(k=>{
+        const cl = CLAUSES[docType][k];
+        return `<div class="p-clause"><b>${esc(cl.t)}</b><p>${esc(cl.p)}</p></div>`;
+      }).join('')
+    : '';
+
+  F('p-sigp').textContent = F('sigProvider').value;
+  F('p-sigc').textContent = F('sigClient').value;
+  F('p-sigpw').textContent = F('bizName').value || 'Provider signature';
+  F('p-sigcw').textContent = F('clientName').value || 'Client signature';
+  F('p-sigpd').textContent = F('docDate').value ? 'Date: '+F('docDate').value : '';
+  F('p-sigcd').textContent = F('docDate').value ? 'Date: '+F('docDate').value : '';
+}
+
+function snapshot(){
+  return {docType, items, activeClauses,
+    fields:['bizName','bizDetails','docNo','docDate','validUntil','projectTitle','currency','taxRate','clientName','clientDetails','sigProvider','sigClient']
+      .reduce((o,k)=>(o[k]=F(k).value,o),{})};
+}
+function saveDraft(){ localStorage.setItem('proposalforge-draft', JSON.stringify(snapshot())); toast('Draft saved ✓'); }
+function loadDraft(){
+  const d = JSON.parse(localStorage.getItem('proposalforge-draft')||'null');
+  if(!d) return toast('No saved draft found');
+  Object.entries(d.fields||{}).forEach(([k,v])=>F(k).value=v);
+  items = d.items||[]; activeClauses = d.activeClauses||[];
+  setDocType(d.docType||'proposal'); renderItems(); render(); toast('Draft loaded ✓');
+}
+function clearAll(){
+  if(!confirm('Clear the current document?')) return;
+  localStorage.removeItem('proposalforge-draft');
+  items=[]; renderItems();
+  ['bizName','bizDetails','docNo','docDate','validUntil','projectTitle','clientName','clientDetails','sigProvider','sigClient','customClause'].forEach(k=>F(k).value='');
+  F('taxRate').value=0; setDocType(docType); render();
+}
+function toast(msg){
+  const el=F('toast'); el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2000);
+}
+
+setDocType('proposal');
+addItem();
+</script>
+</body>
+</html>
