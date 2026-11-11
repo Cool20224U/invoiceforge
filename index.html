@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InvoiceForge — Professional Invoice Generator</title>
+<style>
+:root{
+  --bg:#0f1117;--panel:#181b24;--panel2:#1f2330;--border:#2a2f3f;
+  --text:#e8eaf2;--muted:#8b90a3;--accent:#6c5ce7;--accent2:#a29bfe;
+  --green:#00b894;--red:#e17055;--radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.app{display:grid;grid-template-columns:420px 1fr;min-height:100vh}
+@media(max-width:1000px){.app{grid-template-columns:1fr}.preview-wrap{order:-1}}
+
+/* ---------- Sidebar (form) ---------- */
+.sidebar{background:var(--panel);border-right:1px solid var(--border);padding:28px;overflow-y:auto;max-height:100vh}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px;margin-bottom:24px}
+.logo .mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px}
+h2.sec{font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin:26px 0 12px}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+input,select,textarea{width:100%;background:var(--panel2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:9px 12px;font-size:14px;outline:none;margin-bottom:12px}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer;transition:.15s}
+.btn:hover{background:#5a4bd1}
+.btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn.ghost:hover{border-color:var(--accent)}
+.btn.block{width:100%;margin-top:8px}
+
+/* line items */
+.item{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;position:relative}
+.item .del{position:absolute;top:10px;right:10px;background:none;border:none;color:var(--red);font-size:16px;cursor:pointer}
+.item .line1{display:grid;grid-template-columns:1fr 90px 100px 100px;gap:8px}
+.item input{margin-bottom:0}
+.tiny{font-size:11px;color:var(--muted);margin-top:4px;display:block}
+
+/* ---------- Preview ---------- */
+.preview-wrap{padding:34px;display:flex;flex-direction:column;align-items:center;background:
+  radial-gradient(1000px 500px at 80% -10%,rgba(108,92,231,.12),transparent)}
+.paper{width:100%;max-width:800px;background:#fff;color:#1a1a2e;border-radius:6px;box-shadow:0 20px 60px rgba(0,0,0,.5);padding:56px;position:relative}
+.paper *{color:inherit}
+.p-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:40px}
+.p-brand{font-size:26px;font-weight:800;color:#1a1a2e}
+.p-brand small{display:block;font-size:12px;font-weight:400;color:#666;margin-top:6px;white-space:pre-line}
+.p-title{font-size:38px;font-weight:300;letter-spacing:4px;color:#6c5ce7;text-transform:uppercase}
+.p-meta{text-align:right;font-size:13px;color:#555;line-height:1.9}
+.p-meta b{color:#1a1a2e}
+.p-parties{display:flex;justify-content:space-between;gap:30px;margin-bottom:44px}
+.p-parties h4{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#999;margin-bottom:10px}
+.p-parties .val{font-size:14px;line-height:1.7;white-space:pre-line}
+table.items{width:100%;border-collapse:collapse;margin-bottom:30px}
+table.items th{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:#999;text-align:left;padding:10px 8px;border-bottom:2px solid #e8e8f2}
+table.items td{padding:12px 8px;font-size:14px;border-bottom:1px solid #f0f0f6}
+table.items .r{text-align:right}
+table.items .desc{color:#555;font-size:13px}
+.p-totals{display:flex;justify-content:flex-end;margin-bottom:40px}
+.p-totals table{font-size:14px}
+.p-totals td{padding:6px 12px}
+.p-totals .grand td{border-top:2px solid #1a1a2e;font-weight:800;font-size:17px;color:#6c5ce7}
+.p-notes{font-size:13px;color:#555;border-top:1px solid #e8e8f2;padding-top:20px;line-height:1.7;white-space:pre-line}
+.p-badge{position:absolute;top:56px;left:56px;font-size:10px;letter-spacing:2px;color:#bbb;text-transform:uppercase}
+
+/* statusbar */
+.statusbar{display:flex;gap:12px;align-items:center;margin-bottom:20px;width:100%;max-width:800px;justify-content:space-between}
+.statusbar .hint{font-size:13px;color:var(--muted)}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--green);color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;opacity:0;transition:.3s;pointer-events:none}
+.toast.show{opacity:1}
+
+@media print{
+  body{background:#fff}
+  .sidebar,.statusbar,.toast{display:none!important}
+  .app{display:block}
+  .preview-wrap{padding:0;background:none}
+  .paper{box-shadow:none;border-radius:0;max-width:100%;padding:24px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="logo"><div class="mark">⚡</div>InvoiceForge</div>
+
+    <h2 class="sec">Your business</h2>
+    <label for="bizName">Business name</label>
+    <input id="bizName" placeholder="Acme Studio" oninput="render()">
+    <label for="bizDetails">Address / contact</label>
+    <textarea id="bizDetails" rows="3" placeholder="123 Main St&#10;hello@acme.com&#10;+1 555 0100" oninput="render()"></textarea>
+
+    <h2 class="sec">Invoice details</h2>
+    <div class="row">
+      <div><label for="invNo">Invoice #</label><input id="invNo" oninput="render()"></div>
+      <div><label for="invDate">Date</label><input id="invDate" type="date" oninput="render()"></div>
+    </div>
+    <div class="row">
+      <div><label for="dueDate">Due date</label><input id="dueDate" type="date" oninput="render()"></div>
+      <div><label for="currency">Currency</label>
+        <select id="currency" onchange="render()">
+          <option value="$">$ USD</option><option value="€">€ EUR</option>
+          <option value="£">£ GBP</option><option value="¥">¥ JPY</option>
+          <option value="₹">₹ INR</option><option value="R$">R$ BRL</option>
+        </select>
+      </div>
+    </div>
+
+    <h2 class="sec">Bill to</h2>
+    <label for="clientName">Client name</label>
+    <input id="clientName" placeholder="Jane Doe / Globex Inc." oninput="render()">
+    <label for="clientDetails">Client details</label>
+    <textarea id="clientDetails" rows="3" placeholder="456 Oak Ave&#10;jane@globex.com" oninput="render()"></textarea>
+
+    <h2 class="sec">Line items</h2>
+    <div id="items"></div>
+    <button class="btn ghost block" onclick="addItem()">+ Add item</button>
+
+    <h2 class="sec">Options</h2>
+    <div class="row">
+      <div><label for="taxRate">Tax rate (%)</label><input id="taxRate" type="number" value="0" min="0" step="0.1" oninput="render()"></div>
+      <div><label for="discount">Discount</label><input id="discount" type="number" value="0" min="0" step="0.01" oninput="render()"></div>
+    </div>
+    <label for="notes">Notes / payment terms</label>
+    <textarea id="notes" rows="3" placeholder="Payment due within 14 days. Bank: 0123456 / Thank you!" oninput="render()"></textarea>
+
+    <h2 class="sec">Data</h2>
+    <button class="btn ghost block" onclick="saveDraft()">💾 Save draft</button>
+    <button class="btn ghost block" onclick="loadDraft()">📂 Load draft</button>
+    <button class="btn ghost block" onclick="clearAll()" style="color:var(--red)">Clear everything</button>
+  </aside>
+
+  <main class="preview-wrap">
+    <div class="statusbar">
+      <span class="hint">Live preview — click <b>Download PDF</b> and choose “Save as PDF”.</span>
+      <button class="btn" onclick="window.print()">⬇ Download PDF</button>
+    </div>
+    <div class="paper" id="paper">
+      <div class="p-badge">InvoiceForge</div>
+      <div class="p-head">
+        <div>
+          <div class="p-brand" id="p-biz">Your Business</div>
+          <small id="p-bizdet" style="white-space:pre-line;color:#666;font-size:12px;line-height:1.6"></small>
+        </div>
+        <div style="text-align:right">
+          <div class="p-title">Invoice</div>
+          <div class="p-meta" id="p-meta"></div>
+        </div>
+      </div>
+      <div class="p-parties">
+        <div><h4>Bill to</h4><div class="val" id="p-client"></div></div>
+        <div style="max-width:46%;text-align:right"><h4>Amount due</h4><div class="val" id="p-due" style="font-size:22px;font-weight:700;color:#6c5ce7"></div></div>
+      </div>
+      <table class="items">
+        <thead><tr><th>Description</th><th class="r">Qty</th><th class="r">Rate</th><th class="r">Amount</th></tr></thead>
+        <tbody id="p-rows"></tbody>
+      </table>
+      <div class="p-totals"><table id="p-totals"></table></div>
+      <div class="p-notes" id="p-notes"></div>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const F = id => document.getElementById(id);
+const fmt = n => (Math.round(n*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+let items = [];
+
+function addItem(){
+  items.push({desc:'Service description',qty:1,rate:0});
+  renderItems(); render();
+}
+function delItem(i){ items.splice(i,1); renderItems(); render(); }
+function renderItems(){
+  F('items').innerHTML = items.map((it,i)=>`
+    <div class="item">
+      <button class="del" onclick="delItem(${i})" title="Remove">✕</button>
+      <input placeholder="Description" value="${it.desc.replace(/"/g,'&quot;')}" oninput="items[${i}].desc=this.value;render()">
+      <div class="line1" style="margin-top:8px">
+        <input type="number" min="0" step="any" value="${it.qty}" oninput="items[${i}].qty=+this.value||0;render()">
+        <input type="number" min="0" step="any" value="${it.rate}" oninput="items[${i}].rate=+this.value||0;render()">
+        <div></div>
+      </div>
+      <span class="tiny">Qty × Rate updates the preview instantly</span>
+    </div>`).join('');
+}
+
+function totals(){
+  const sub = items.reduce((s,it)=>s+(it.qty*it.rate),0);
+  const disc = Math.min(+F('discount').value||0, sub);
+  const afterDisc = sub - disc;
+  const tax = afterDisc * ((+F('taxRate').value||0)/100);
+  return {sub, disc, tax, total: afterDisc + tax};
+}
+
+function render(){
+  const c = F('currency').value;
+  const money = n => `${c}${fmt(n)}`;
+  const t = totals();
+
+  F('invNo').value = F('invNo').value || 'INV-001';
+  F('invDate').value = F('invDate').value || new Date().toISOString().slice(0,10);
+
+  F('p-biz').textContent = F('bizName').value || 'Your Business';
+  F('p-bizdet').textContent = F('bizDetails').value;
+  F('p-meta').innerHTML =
+    `<b>Invoice #</b> ${esc(F('invNo').value)}<br>` +
+    `<b>Date</b> ${esc(F('invDate').value)}<br>` +
+    `<b>Due</b> ${esc(F('dueDate').value || '—')}`;
+  F('p-client').textContent = (F('clientName').value + '\n' + F('clientDetails').value).trim() || 'Client name';
+  F('p-due').textContent = money(t.total);
+
+  F('p-rows').innerHTML = items.map(it=>`
+    <tr>
+      <td class="desc">${esc(it.desc) || '—'}</td>
+      <td class="r">${it.qty}</td>
+      <td class="r">${money(it.rate)}</td>
+      <td class="r">${money(it.qty*it.rate)}</td>
+    </tr>`).join('') || '<tr><td colspan="4" class="desc">Add line items to get started…</td></tr>';
+
+  let rows = `<tr><td>Subtotal</td><td class="r">${money(t.sub)}</td></tr>`;
+  if (t.disc > 0) rows += `<tr><td>Discount</td><td class="r">−${money(t.disc)}</td></tr>`;
+  if (t.tax > 0) rows += `<tr><td>Tax (${F('taxRate').value}%)</td><td class="r">${money(t.tax)}</td></tr>`;
+  rows += `<tr class="grand"><td>Total due</td><td class="r">${money(t.total)}</td></tr>`;
+  F('p-totals').innerHTML = rows;
+
+  F('p-notes').textContent = F('notes').value;
+}
+
+function esc(s){ return String(s).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+
+function snapshot(){
+  return {items, fields:['bizName','bizDetails','invNo','invDate','dueDate','currency','clientName','clientDetails','taxRate','discount','notes']
+    .reduce((o,k)=>(o[k]=F(k).value,o),{})};
+}
+function saveDraft(){
+  localStorage.setItem('invoiceforge-draft', JSON.stringify(snapshot()));
+  toast('Draft saved ✓');
+}
+function loadDraft(){
+  const d = JSON.parse(localStorage.getItem('invoiceforge-draft')||'null');
+  if(!d) return toast('No saved draft found');
+  Object.entries(d.fields||{}).forEach(([k,v])=>F(k).value=v);
+  items = d.items||[]; renderItems(); render(); toast('Draft loaded ✓');
+}
+function clearAll(){
+  if(!confirm('Clear the current invoice?')) return;
+  localStorage.removeItem('invoiceforge-draft');
+  items=[]; renderItems();
+  ['bizName','bizDetails','invNo','invDate','dueDate','clientName','clientDetails','notes'].forEach(k=>F(k).value='');
+  F('taxRate').value=0; F('discount').value=0; render();
+}
+function toast(msg){
+  const el=F('toast'); el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2000);
+}
+
+addItem();
+</script>
+</body>
+</html>
