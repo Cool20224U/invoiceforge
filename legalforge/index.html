@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LegalForge — NDA, IP Assignment & Service Agreements for Freelancers</title>
+<style>
+:root{
+  --bg:#0f1117;--panel:#181b24;--panel2:#1f2330;--border:#2a2f3f;
+  --text:#e8eaf2;--muted:#8b90a3;--accent:#e17055;--accent2:#fab1a0;
+  --red:#e17055;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.app{display:grid;grid-template-columns:440px 1fr;min-height:100vh}
+@media(max-width:1000px){.app{grid-template-columns:1fr}.preview-wrap{order:-1}}
+
+.sidebar{background:var(--panel);border-right:1px solid var(--border);padding:28px;overflow-y:auto;max-height:100vh}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px;margin-bottom:6px}
+.logo .mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px}
+.tagline{font-size:12px;color:var(--muted);margin-bottom:22px}
+h2.sec{font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin:24px 0 12px}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+input,select,textarea{width:100%;background:var(--panel2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:9px 12px;font-size:14px;outline:none;margin-bottom:12px;font-family:inherit}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer;transition:.15s}
+.btn:hover{filter:brightness(1.1)}
+.btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn.ghost:hover{border-color:var(--accent)}
+.btn.block{width:100%;margin-top:6px}
+
+.doctype{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:6px}
+.doctype button{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:12px 6px;color:var(--muted);cursor:pointer;font-size:12px;font-weight:600;transition:.15s}
+.doctype button.active{border-color:var(--accent);color:var(--accent2);background:rgba(225,112,85,.08)}
+
+.clause{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.clause b{font-size:13px;display:block;margin-bottom:3px}
+.clause span{font-size:12px;color:var(--muted)}
+.clause .add{background:var(--accent);border:none;color:#fff;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+
+.preview-wrap{padding:34px;display:flex;flex-direction:column;align-items:center;background:radial-gradient(1000px 500px at 80% -10%,rgba(225,112,85,.10),transparent)}
+.paper{width:100%;max-width:800px;background:#fff;color:#1a1a2e;border-radius:6px;box-shadow:0 20px 60px rgba(0,0,0,.5);padding:56px}
+.paper *{color:inherit}
+.p-badge{font-size:10px;letter-spacing:2px;color:#bbb;text-transform:uppercase;margin-bottom:26px}
+.p-title{font-size:24px;font-weight:800;text-align:center;margin-bottom:8px;color:#1a1a2e}
+.p-subtitle{text-align:center;font-size:13px;color:#666;margin-bottom:36px}
+.p-parties{font-size:14px;line-height:1.8;color:#333;margin-bottom:34px}
+.p-parties b{color:#1a1a2e}
+.p-body h4{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:#1a1a2e;margin:22px 0 8px}
+.p-body p{font-size:13.5px;line-height:1.9;color:#333;margin-bottom:10px;text-align:justify}
+.p-sigs{display:grid;grid-template-columns:1fr 1fr;gap:40px;border-top:1px solid #e8e8f2;padding-top:30px;margin-top:44px}
+.sig .name{font-size:22px;font-style:italic;font-weight:600;font-family:'Segoe Script','Brush Script MT',cursive;min-height:30px}
+.sig .line{border-bottom:1px solid #1a1a2e;margin:14px 0 6px}
+.sig .who{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:#999}
+.sig .date{font-size:12px;color:#555;margin-top:4px}
+.statusbar{display:flex;gap:12px;align-items:center;margin-bottom:20px;width:100%;max-width:800px;justify-content:space-between}
+.statusbar .hint{font-size:13px;color:var(--muted)}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;opacity:0;transition:.3s;pointer-events:none}
+.toast.show{opacity:1}
+@media print{
+  body{background:#fff}
+  .sidebar,.statusbar,.toast,.p-badge{display:none!important}
+  .app{display:block}
+  .preview-wrap{padding:0;background:none}
+  .paper{box-shadow:none;border-radius:0;max-width:100%;padding:24px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="logo"><div class="mark">🧾</div>LegalForge</div>
+    <div class="tagline">NDAs, IP assignments & service agreements — in minutes.</div>
+
+    <h2 class="sec">Document type</h2>
+    <div class="doctype">
+      <button id="dt-nda" class="active" onclick="setDocType('nda')">NDA</button>
+      <button id="dt-ip" onclick="setDocType('ip')">IP Assignment</button>
+      <button id="dt-sa" onclick="setDocType('sa')">Service Agreement</button>
+    </div>
+
+    <h2 class="sec">Parties</h2>
+    <label for="providerName">You / the Provider</label>
+    <input id="providerName" placeholder="John Smith / Acme Studio" oninput="render()">
+    <label for="providerDetails">Your details</label>
+    <textarea id="providerDetails" rows="2" placeholder="123 Main St, City" oninput="render()">
+    <label for="clientName">Client / the other party</label>
+    <input id="clientName" placeholder="Globex Inc." oninput="render()">
+    <label for="clientDetails">Their details</label>
+    <textarea id="clientDetails" rows="2" placeholder="456 Oak Ave, City" oninput="render()">
+
+    <h2 class="sec">Document details</h2>
+    <div class="row">
+      <div><label for="docNo">Number</label><input id="docNo" oninput="render()"></div>
+      <div><label for="docDate">Date</label><input id="docDate" type="date" oninput="render()"></div>
+    </div>
+    <label for="projectTitle">Project / subject</label>
+    <input id="projectTitle" placeholder="Website redesign project" oninput="render()">
+    <div class="row" id="extraFields">
+      <div><label for="currency">Currency</label>
+        <select id="currency" onchange="render()">
+          <option value="$">$ USD</option><option value="€">€ EUR</option>
+          <option value="£">£ GBP</option><option value="₹">₹ INR</option>
+          <option value="R$">R$ BRL</option><option value="¥">¥ JPY</option>
+        </select>
+      </div>
+      <div><label for="feeAmount">Fee / amount</label><input id="feeAmount" type="number" min="0" step="0.01" placeholder="0.00" oninput="render()"></div>
+    </div>
+
+    <h2 class="sec">Clauses</h2>
+    <div id="clauseLib"></div>
+
+    <h2 class="sec">Signatures</h2>
+    <div class="row">
+      <div><label for="sigProvider">You (type name)</label><input id="sigProvider" placeholder="John Smith" oninput="render()"></div>
+      <div><label for="sigClient">Client (type name)</label><input id="sigClient" placeholder="Jane Doe" oninput="render()"></div>
+    </div>
+    <span style="font-size:11px;color:var(--muted);display:block;margin-top:4px">Typed signatures are legally recognized in most jurisdictions (ESIGN / eIDAS).</span>
+
+    <h2 class="sec">Data</h2>
+    <button class="btn ghost block" onclick="saveDraft()">💾 Save draft</button>
+    <button class="btn ghost block" onclick="loadDraft()">📂 Load draft</button>
+    <button class="btn ghost block" onclick="clearAll()" style="color:var(--red)">Clear everything</button>
+  </aside>
+
+  <main class="preview-wrap">
+    <div class="statusbar">
+      <span class="hint">Live preview — click <b>Download PDF</b> and choose “Save as PDF”. Not legal advice — have important contracts reviewed by a lawyer.</span>
+      <button class="btn" onclick="window.print()">⬇ Download PDF</button>
+    </div>
+    <div class="paper">
+      <div class="p-badge">LegalForge</div>
+      <div class="p-title" id="p-title"></div>
+      <div class="p-subtitle" id="p-subtitle"></div>
+      <div class="p-parties" id="p-parties"></div>
+      <div class="p-body" id="p-body"></div>
+      <div class="p-sigs">
+        <div class="sig"><div class="name" id="p-sigp"></div><div class="line"></div><div class="who" id="p-sigpw"></div><div class="date" id="p-sigpd"></div></div>
+        <div class="sig"><div class="name" id="p-sigc"></div><div class="line"></div><div class="who" id="p-sigcw"></div><div class="date" id="p-sigcd"></div></div>
+      </div>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const F = id => document.getElementById(id);
+let docType = 'nda';
+let activeClauses = [];
+const fmt = n => (Math.round(n*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+const DOCS = {
+  nda: {
+    no:'NDA', title:'Mutual Non-Disclosure Agreement',
+    subtitle:()=>'Confidentiality agreement between the parties named below.',
+    parties: P => `This Mutual Non-Disclosure Agreement ("Agreement") is made on ${P.date} between <b>${P.provider}</b> and <b>${P.client}</b> (each a "Party", together the "Parties"), concerning ${P.project}.`,
+    clauses:{
+      definition:{t:'1. Confidential Information', p:P=>`"Confidential Information" means any non-public information disclosed by one Party to the other in connection with ${P.project}, whether written, oral, or electronic, including business plans, designs, code, pricing, and client lists.`},
+      obligations:{t:'2. Obligations', p:()=>`Each Party agrees to (a) hold the other's Confidential Information in strict confidence, (b) use it only for the purpose of ${'{project}'}, and (c) not disclose it to third parties without prior written consent.`},
+      exclusions:{t:'3. Exclusions', p:()=>`Confidential Information does not include information that is (a) publicly available through no fault of the receiving Party, (b) already known to the receiving Party without restriction, (c) independently developed, or (d) required to be disclosed by law, provided prompt notice is given.`},
+      term:{t:'4. Term', p:()=>`This Agreement takes effect on the date above and continues for two (2) years, after which the obligations of confidentiality survive for trade secrets for as long as they remain trade secrets.`},
+      return:{t:'5. Return of Materials', p:()=>`Upon request, each Party will promptly return or destroy all Confidential Information received from the other Party and certify such destruction in writing.`},
+      remedies:{t:'6. Remedies', p:()=>`Any breach of this Agreement may cause irreparable harm, for which monetary damages are insufficient. The disclosing Party is entitled to seek injunctive relief in addition to any other remedies.`}
+    },
+    defaults:['definition','obligations','exclusions','term']
+  },
+  ip: {
+    no:'IPA', title:'Intellectual Property Assignment',
+    subtitle:()=>'Transfer of intellectual property rights in the work created for the project.',
+    parties: P => `This Intellectual Property Assignment ("Agreement") is made on ${P.date} between <b>${P.provider}</b> ("Assignor") and <b>${P.client}</b> ("Assignee"), concerning ${P.project}.`,
+    clauses:{
+      assignment:{t:'1. Assignment of Rights', p:P=>`Upon receipt of full payment of the agreed fee, the Assignor hereby assigns to the Assignee all right, title, and interest in and to the deliverables created for ${P.project}, including all copyrights, trademarks, and other intellectual property rights therein.`},
+      future:{t:'2. Further Assurances', p:()=>`The Assignor agrees to execute any additional documents reasonably necessary to perfect the Assignee's ownership of the assigned rights, at no additional cost.`},
+      license:{t:'3. Assignor License', p:()=>`The Assignor retains a non-exclusive, royalty-free license to display the deliverables in their portfolio and promotional materials, unless a separate written agreement prohibits it.`},
+      warranty:{t:'4. Warranty of Originality', p:()=>`The Assignor warrants that the deliverables are original work, do not infringe any third-party rights, and that the Assignor has full authority to assign the rights described above.`},
+      thirdparty:{t:'5. Third-Party Materials', p:()=>`Any third-party materials (fonts, stock images, open-source code) included in the deliverables remain subject to their own licenses. The Assignor will disclose such materials on request.`}
+    },
+    defaults:['assignment','future','license','warranty']
+  },
+  sa: {
+    no:'SA', title:'Service Agreement',
+    subtitle:()=>'Agreement for the provision of services described below.',
+    parties: P => `This Service Agreement ("Agreement") is made on ${P.date} between <b>${P.provider}</b> ("Provider") and <b>${P.client}</b> ("Client"), concerning ${P.project}.`,
+    clauses:{
+      services:{t:'1. Services', p:P=>`The Provider will perform the services described in ${P.project} with professional skill and care. Material changes to the scope require a written change order signed by both Parties.`},
+      fees:{t:'2. Fees & Payment', p:P=>`The Client will pay the Provider the fee of ${P.fee}, payable according to the payment schedule agreed between the Parties. Late payments may accrue interest at 1.5% per month.`},
+      timeline:{t:'3. Timeline & Client Duties', p:()=>`The Provider will use reasonable efforts to meet agreed deadlines, provided the Client supplies required materials, access, and feedback promptly. Client delays shift deadlines accordingly.`},
+      ownership:{t:'4. Intellectual Property', p:()=>`Upon full payment, the Client owns the final deliverables. The Provider retains portfolio rights and ownership of pre-existing tools and know-how used to produce them.`},
+      termination:{t:'5. Termination', p:()=>`Either Party may terminate this Agreement with fourteen (14) days written notice. The Client will pay for all services performed up to the termination date.`},
+      liability:{t:'6. Limitation of Liability', p:()=>`The Provider's total liability under this Agreement is limited to the total fees paid. Neither Party is liable for indirect or consequential damages.`}
+    },
+    defaults:['services','fees','timeline','ownership']
+  }
+};
+
+function setDocType(t){
+  docType = t;
+  ['nda','ip','sa'].forEach(k=>F('dt-'+k).classList.toggle('active',k===t));
+  activeClauses = [...DOCS[t].defaults];
+  renderClauseLib(); render();
+}
+function toggleClause(k){
+  const i = activeClauses.indexOf(k);
+  if(i>=0) activeClauses.splice(i,1); else activeClauses.push(k);
+  renderClauseLib(); render();
+}
+function renderClauseLib(){
+  F('clauseLib').innerHTML = Object.entries(DOCS[docType].clauses).map(([k,c])=>`
+    <div class="clause">
+      <div><b>${c.t}</b><span>${stripTags(c.p({provider:'',client:'',project:'the project',date:'',fee:''})).slice(0,70)}…</span></div>
+      <button class="add" onclick="toggleClause('${k}')">${activeClauses.includes(k)?'− Remove':'+ Add'}</button>
+    </div>`).join('');
+}
+function stripTags(s){ return String(s).replace(/<[^>]*>/g,''); }
+function esc(s){ return String(s).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+
+function render(){
+  const D = DOCS[docType];
+  F('docNo').value = F('docNo').value || D.no+'-001';
+  F('docDate').value = F('docDate').value || new Date().toISOString().slice(0,10);
+
+  const P = {
+    provider: esc(F('providerName').value) || 'the Provider',
+    client: esc(F('clientName').value) || 'the Client',
+    project: esc(F('projectTitle').value) || 'the project',
+    date: esc(F('docDate').value),
+    fee: F('currency').value + fmt(+F('feeAmount').value||0)
+  };
+
+  F('p-title').textContent = D.title;
+  F('p-subtitle').textContent = D.subtitle().replace('{no}', F('docNo').value);
+  F('p-parties').innerHTML = D.parties(P).replace(/{no}/g, esc(F('docNo').value));
+
+  F('p-body').innerHTML = activeClauses.map(k=>{
+    const c = D.clauses[k];
+    const text = c.p(P).replace('{project}', P.project);
+    return `<h4>${c.t}</h4><p>${text}</p>`;
+  }).join('');
+
+  F('p-sigp').textContent = F('sigProvider').value;
+  F('p-sigc').textContent = F('sigClient').value;
+  F('p-sigpw').textContent = F('providerName').value || 'Provider signature';
+  F('p-sigcw').textContent = F('clientName').value || 'Client signature';
+  F('p-sigpd').textContent = F('docDate').value ? 'Date: '+F('docDate').value : '';
+  F('p-sigcd').textContent = F('docDate').value ? 'Date: '+F('docDate').value : '';
+}
+
+function snapshot(){
+  return {docType, activeClauses,
+    fields:['providerName','providerDetails','clientName','clientDetails','docNo','docDate','projectTitle','currency','feeAmount','sigProvider','sigClient']
+      .reduce((o,k)=>(o[k]=F(k).value,o),{})};
+}
+function saveDraft(){ localStorage.setItem('legalforge-draft', JSON.stringify(snapshot())); toast('Draft saved ✓'); }
+function loadDraft(){
+  const d = JSON.parse(localStorage.getItem('legalforge-draft')||'null');
+  if(!d) return toast('No saved draft found');
+  Object.entries(d.fields||{}).forEach(([k,v])=>F(k).value=v);
+  activeClauses = d.activeClauses||[];
+  setDocType(d.docType||'nda'); render(); toast('Draft loaded ✓');
+}
+function clearAll(){
+  if(!confirm('Clear the current document?')) return;
+  localStorage.removeItem('legalforge-draft');
+  ['providerName','providerDetails','clientName','clientDetails','docNo','docDate','projectTitle','feeAmount','sigProvider','sigClient'].forEach(k=>F(k).value='');
+  setDocType(docType); render();
+}
+function toast(msg){
+  const el=F('toast'); el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2000);
+}
+
+setDocType('nda');
+</script>
+</body>
+</html>
